@@ -21,7 +21,7 @@ Icon
 
 # decmopiled apks in mydata/apks
 /mydata/apks/*
-mongodb.secret
+./mongodb.secrete
 
 
 # Directories potentially created on remote AFP share
