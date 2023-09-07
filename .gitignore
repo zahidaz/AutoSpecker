@@ -19,6 +19,10 @@ Icon
 .VolumeIcon.icns
 .com.apple.timemachine.donotpresent
 
+# decmopiled apks in mydata/apks
+./mydata/apks/*
+
+
 # Directories potentially created on remote AFP share
 .AppleDB
 .AppleDesktop
