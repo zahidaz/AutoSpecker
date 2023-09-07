@@ -1,4 +1,4 @@
-# SpeckApp Documentation | NON-OFFICAL
+# SpeckApp Documentation | THIS IS NON-OFFICAL APP
 
 **SpeckApp** is a Python application designed to assist users in manually validating documents stored in a MongoDB database. It provides a graphical interface for reviewing and updating document records, along with the ability to view associated files and copy document IDs to the clipboard. This documentation provides an overview of the SpeckApp code, its functionality, and how to use it.
 
