@@ -197,6 +197,8 @@ class SpeckApp:
     def on_next(self, event):
         msg = "Getting Next Document..."
         doc = self.next_document()
+        if doc is None:
+            return
         self.on_new_doc(doc, msg)
     
     def on_prev(self, event):
