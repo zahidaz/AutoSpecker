@@ -132,6 +132,7 @@ class SpeckApp:
         if self.cursor is None:
             print("[!] Error: Cursor is None")
             self.set_console("[!] Cursor is None. Are you connected to the database?", True)
+            return 
         try:
             if not self.history or self.history_pointer is None or self.history_pointer == len(self.history) - 1:
                 # If there's no history or the pointer is at the end of the history
