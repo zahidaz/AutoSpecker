@@ -16,7 +16,12 @@ class SpeckApp:
         self.mongo_uri = ""
         with open("mongodb.secrete", "r") as f:
             self.mongo_uri = f.read()
-        self.query = {"manual_validation": {"$exists": False}}
+        # self.query = {"manual_validation": {"$exists": False}}
+        self.sort = [("rule", 1)]
+        self.query = {
+            "manual_validation": {"$exists": False},
+            "apk": "/mydata/apks/com.airbnb.android"
+        }
         self.cursor = None
 
         self.current_doc = None
@@ -59,6 +64,14 @@ class SpeckApp:
             code_style=ft.TextStyle(font_family="Roboto Mono"),
         )
 
+        self.code_view = ft.Markdown(
+            json_code,
+            selectable=True,
+            extension_set="gitHubWeb",
+            code_theme="atom-one-dark",
+            code_style=ft.TextStyle(font_family="Roboto Mono"),
+        )
+
     def initialize_buttons(self):
         self.prev_button = ft.ElevatedButton("Prev", on_click=self.on_prev)
         self.false_button = ft.ElevatedButton("False & Next", on_click=self.on_false)
@@ -92,7 +105,7 @@ class SpeckApp:
             client.admin.command('ismaster')
             db = client['speck']
             self.collection = db['s2']
-            self.cursor = self.collection.find(self.query)
+            self.cursor = self.collection.find(self.query).sort(self.sort)
             self.set_console("Connected to MongoDB")
             # call next to setup the empty views
             self.on_next(event)
@@ -168,6 +181,7 @@ class SpeckApp:
 
     def on_new_doc(self, doc, msg):
         print(msg)
+        file_path = "."+doc['file']
         self.set_console(msg)
         if doc is not None:
             json_code = json.dumps(doc, indent=4)
@@ -190,10 +204,15 @@ class SpeckApp:
                 self.rule.value = rule
                 self.rule.update()
 
-        file_path = "."+self.current_doc['file']
         # check if the file exists
         if not os.path.exists(file_path):
             self.set_console("File does not exist", error=True)
+            self.code_view.value = f"```java\nFile Does NOT exists\n```"
+            self.code_view.update()
+        else:
+            code_context = self.read_code_context(file_path)
+            self.code_view.value = f"```java\n{code_context}\n```"
+            self.code_view.update()
 
     def on_next(self, event):
         msg = "Getting Next Document..."
@@ -229,6 +248,17 @@ class SpeckApp:
         except Exception as e:
             self.set_console(str(e), error=True)
 
+    def read_code_context(self, file_path):
+        # read 3 lines before and after the line number
+        line_number = self.current_doc['lineNumber']
+        context_size = 4
+        with open(file_path, "r") as f:
+            lines = f.readlines()
+            start = max(0, line_number-context_size)
+            end = min(len(lines), line_number+context_size)
+            code_context = "".join(lines[start:end])
+            return code_context
+
     def cp_id_to_clipboard(self, event):
         if self.current_doc is None:
             self.set_console("No document found", error=True)
@@ -242,6 +272,7 @@ class SpeckApp:
                 ft.Row([self.console_view,], alignment=ft.MainAxisAlignment.CENTER),
                 ft.Row([self.mongo_uri_input, self.connect_db_button], alignment=ft.MainAxisAlignment.CENTER),
                 self.json_view,
+                self.code_view,
                 self.rule,
             ],
             scroll=ft.ScrollMode.ALWAYS,
