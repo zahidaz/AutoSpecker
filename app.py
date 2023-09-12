@@ -16,12 +16,12 @@ class SpeckApp:
         self.mongo_uri = ""
         with open("mongodb.secrete", "r") as f:
             self.mongo_uri = f.read()
-        # self.query = {"manual_validation": {"$exists": False}}
+        self.query = {"manual_validation": {"$exists": False}}
         self.sort = [("rule", 1)]
-        self.query = {
-            "manual_validation": {"$exists": False},
-            "apk": "/mydata/apks/com.airbnb.android"
-        }
+        # self.query = {
+        #     "manual_validation": {"$exists": False},
+        #     "apk": "/mydata/apks/com.airbnb.android"
+        # }
         self.cursor = None
 
         self.current_doc = None
@@ -251,7 +251,7 @@ class SpeckApp:
     def read_code_context(self, file_path):
         # read 3 lines before and after the line number
         line_number = self.current_doc['lineNumber']
-        context_size = 4
+        context_size = 6
         with open(file_path, "r") as f:
             lines = f.readlines()
             start = max(0, line_number-context_size)
