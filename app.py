@@ -8,8 +8,9 @@ from bson import ObjectId, json_util
 import pyperclip
 import flet as ft
 
+
 class SpeckApp:
-    def __init__(self, page: ft.Page): 
+    def __init__(self, page: ft.Page):
         self.history = []
         self.history_pointer = -1
 
@@ -46,10 +47,14 @@ class SpeckApp:
             text_size=10,
             height=20,
             content_padding=3,
-            expand=True
+            expand=True,
         )
-        self.connect_db_button = ft.ElevatedButton("Connect to DB", height=20, on_click=self.on_connect)
-        self.console_view = ft.Text("Console... Status Appears Here", bgcolor="#fffbbb", max_lines=5)
+        self.connect_db_button = ft.ElevatedButton(
+            "Connect to DB", height=20, on_click=self.on_connect
+        )
+        self.console_view = ft.Text(
+            "Console... Status Appears Here", bgcolor="#fffbbb", max_lines=5
+        )
         self.comment_txt_in = ft.TextField(hint_text="Comment...", width=600)
         self.rule = ft.Markdown("", selectable=True)
 
@@ -77,11 +82,14 @@ class SpeckApp:
         self.false_button = ft.ElevatedButton("False & Next", on_click=self.on_false)
         self.true_button = ft.ElevatedButton("True & Next", on_click=self.on_true)
         self.next_button = ft.ElevatedButton("Next", on_click=self.on_next)
-        self.open_file_button = ft.ElevatedButton("Show In Editor", on_click=self.open_file)
-        self.cp_id_to_clipboard_button = ft.ElevatedButton("Copy ID", on_click=self.cp_id_to_clipboard)
+        self.open_file_button = ft.ElevatedButton(
+            "Show In Editor", on_click=self.open_file
+        )
+        self.cp_id_to_clipboard_button = ft.ElevatedButton(
+            "Copy ID", on_click=self.cp_id_to_clipboard
+        )
 
     def set_console(self, msg, error=False):
-
         if error:
             self.console_view.bgcolor = "#ffbbbb"
         else:
@@ -102,9 +110,9 @@ class SpeckApp:
         try:
             self.set_console("Connecting...")
             client = pymongo.MongoClient(self.mongo_uri)
-            client.admin.command('ismaster')
-            db = client['speck']
-            self.collection = db['s2']
+            client.admin.command("ismaster")
+            db = client["speck"]
+            self.collection = db["s2"]
             self.cursor = self.collection.find(self.query).sort(self.sort)
             self.set_console("Connected to MongoDB")
             # call next to setup the empty views
@@ -120,40 +128,45 @@ class SpeckApp:
         self.update_doc(validated=False)
         self.on_next(event=event)
 
-    def update_doc(self, validated : bool):
+    def update_doc(self, validated: bool):
         doc = self.current_doc or Exception("No document found")
         comment = self.comment_txt_in.value or ""
-        doc['manual_validation'] = validated
-        doc['comment'] = comment
+        doc["manual_validation"] = validated
+        doc["comment"] = comment
         try:
             print("Updating document...")
             update_operation = {
-                "$set": {
-                    "manual_validation": validated,
-                    "comment": comment
-                }
+                "$set": {"manual_validation": validated, "comment": comment}
             }
             doc_id = doc["_id"]["$oid"]
-            doc_id = ObjectId(doc_id) # Convert the doc_id to ObjectId
+            doc_id = ObjectId(doc_id)  # Convert the doc_id to ObjectId
             query = {"_id": doc_id}
             self.collection.update_one(query, update_operation)
             self.log_doc_update(doc)
         except Exception as e:
             self.set_console(str(e), error=True)
-            
+
     def next_document(self):
         if self.cursor is None:
             print("[!] Error: Cursor is None")
-            self.set_console("[!] Cursor is None. Are you connected to the database?", True)
-            return 
+            self.set_console(
+                "[!] Cursor is None. Are you connected to the database?", True
+            )
+            return
         try:
-            if not self.history or self.history_pointer is None or self.history_pointer == len(self.history) - 1:
+            if (
+                not self.history
+                or self.history_pointer is None
+                or self.history_pointer == len(self.history) - 1
+            ):
                 # If there's no history or the pointer is at the end of the history
                 bson = next(self.cursor)
                 json_string = json.dumps(bson, default=json_util.default)
                 doc = json.loads(json_string)
                 self.history.append(doc)
-                self.history_pointer = len(self.history) - 1  # Update the history pointer
+                self.history_pointer = (
+                    len(self.history) - 1
+                )  # Update the history pointer
 
             else:  # If there's a next document in the history
                 self.history_pointer += 1
@@ -164,11 +177,13 @@ class SpeckApp:
 
         except StopIteration:
             return None
-    
+
     def get_prev_document(self):
         if self.history_pointer == 0:
             print("[!] Error: No previous document")
-            self.set_console("[!] No previous document. Are you at the beginning?", True)
+            self.set_console(
+                "[!] No previous document. Are you at the beginning?", True
+            )
         else:
             try:
                 self.history_pointer -= 1
@@ -181,7 +196,7 @@ class SpeckApp:
 
     def on_new_doc(self, doc, msg):
         print(msg)
-        file_path = "."+doc['file']
+        file_path = "." + doc["file"]
         self.set_console(msg)
         if doc is not None:
             json_code = json.dumps(doc, indent=4)
@@ -220,7 +235,7 @@ class SpeckApp:
         if doc is None:
             return
         self.on_new_doc(doc, msg)
-    
+
     def on_prev(self, event):
         msg = "Getting Previous Document..."
         doc = self.get_prev_document()
@@ -228,9 +243,9 @@ class SpeckApp:
             msg = "No previous document found."
             doc = self.current_doc
         self.on_new_doc(doc, msg)
-        
+
     def open_file(self, event):
-        file_path = "."+self.current_doc['file']
+        file_path = "." + self.current_doc["file"]
 
         # check if the file exists
         if not os.path.exists(file_path):
@@ -240,9 +255,9 @@ class SpeckApp:
             if platform.system() == "Windows":
                 os.startfile(file_path)
             elif platform.system() == "Darwin":
-                subprocess.Popen(['open', file_path])
+                subprocess.Popen(["open", file_path])
             elif platform.system() == "Linux":
-                subprocess.Popen(['xdg-open', file_path])
+                subprocess.Popen(["xdg-open", file_path])
             else:
                 self.set_console("Unsupported platform", error=True)
         except Exception as e:
@@ -250,12 +265,12 @@ class SpeckApp:
 
     def read_code_context(self, file_path):
         # read 3 lines before and after the line number
-        line_number = self.current_doc['lineNumber']
+        line_number = self.current_doc["lineNumber"]
         context_size = 6
         with open(file_path, "r") as f:
             lines = f.readlines()
-            start = max(0, line_number-context_size)
-            end = min(len(lines), line_number+context_size)
+            start = max(0, line_number - context_size)
+            end = min(len(lines), line_number + context_size)
             code_context = "".join(lines[start:end])
             return code_context
 
@@ -263,14 +278,22 @@ class SpeckApp:
         if self.current_doc is None:
             self.set_console("No document found", error=True)
             return
-        document_id = self.current_doc["_id"]["$oid"] 
+        document_id = self.current_doc["_id"]["$oid"]
         pyperclip.copy(document_id)
 
     def run(self):
         info_section = ft.Column(
             [
-                ft.Row([self.console_view,], alignment=ft.MainAxisAlignment.CENTER),
-                ft.Row([self.mongo_uri_input, self.connect_db_button], alignment=ft.MainAxisAlignment.CENTER),
+                ft.Row(
+                    [
+                        self.console_view,
+                    ],
+                    alignment=ft.MainAxisAlignment.CENTER,
+                ),
+                ft.Row(
+                    [self.mongo_uri_input, self.connect_db_button],
+                    alignment=ft.MainAxisAlignment.CENTER,
+                ),
                 self.json_view,
                 self.code_view,
                 self.rule,
@@ -287,28 +310,35 @@ class SpeckApp:
             self.next_button,
         ]
 
-        control_section = ft.Column([
-            ft.Row([self.open_file_button, self.cp_id_to_clipboard_button], alignment=ft.MainAxisAlignment.CENTER),
-            self.comment_txt_in,
-            ft.Row(btns, alignment=ft.MainAxisAlignment.CENTER),
-        ])
+        control_section = ft.Column(
+            [
+                ft.Row(
+                    [self.open_file_button, self.cp_id_to_clipboard_button],
+                    alignment=ft.MainAxisAlignment.CENTER,
+                ),
+                self.comment_txt_in,
+                ft.Row(btns, alignment=ft.MainAxisAlignment.CENTER),
+            ]
+        )
         control_section.horizontal_alignment = ft.CrossAxisAlignment.CENTER
 
-        self.page.add(ft.Column(
-            [
-                info_section,
-                control_section,
-            ]
-        ))
+        self.page.add(
+            ft.Column(
+                [
+                    info_section,
+                    control_section,
+                ]
+            )
+        )
 
     def log_doc_update(self, doc):
         with open("logs.csv", "a") as f:
             f.write(f"{doc['_id']},{doc['manual_validation']},{doc['comment']}\n")
 
 
-
 def main(page):
     SpeckApp(page=page).run()
+
 
 if __name__ == "__main__":
     ft.app(target=main, assets_dir="assets")
