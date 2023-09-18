@@ -1,6 +1,6 @@
-# SpeckApp Documentation | THIS IS NON-OFFICAL APP
+# AutoSpecker Documentation | THIS IS NON-OFFICAL APP
 
-**SpeckApp** is a Python application designed to assist users in manually validating documents stored in a MongoDB database. It provides a graphical interface for reviewing and updating document records, along with the ability to view associated files and copy document IDs to the clipboard. This documentation provides an overview of the SpeckApp code, its functionality, and how to use it.
+**AutoSpecker** is a Python application designed to assist users in manually validating documents stored in a MongoDB database. It provides a graphical interface for reviewing and updating document records, along with the ability to view associated files and copy document IDs to the clipboard. This documentation provides an overview of the AutoSpecker code, its functionality, and how to use it.
 
 ## Table of Contents
 
@@ -14,14 +14,14 @@
 
 ## Introduction
 
-SpeckApp is a helper application for the [SPECK Project](https://spritz.math.unipd.it/projects/speck/) developed by the SPRITZ Research Group. It assists users in manually validating documents stored in a MongoDB database. Below are some key resources related to the SPECK Project:
+AutoSpecker is a helper application for the [SPECK Project](https://spritz.math.unipd.it/projects/speck/) developed by the SPRITZ Research Group. It assists users in manually validating documents stored in a MongoDB database. Below are some key resources related to the SPECK Project:
 
 - [SPECK Project Website](https://spritz.math.unipd.it/projects/speck/)
 - [SPECK GitHub Repository](https://github.com/SPRITZ-Research-Group/SPECK)
 
 ## Prerequisites
 
-Before using SpeckApp, ensure you have the following prerequisites:
+Before using AutoSpecker, ensure you have the following prerequisites:
 
 - Python 3
 - The following Python packages, which can be installed using `pip`:
@@ -31,11 +31,11 @@ Before using SpeckApp, ensure you have the following prerequisites:
 
 ## Installation
 
-To set up SpeckApp on your local machine, follow these steps:
+To set up AutoSpecker on your local machine, follow these steps:
 
-1. Clone or download the SpeckApp repository to your local machine.
+1. Clone or download the AutoSpecker repository to your local machine.
 
-2. Navigate to the SpeckApp directory.
+2. Navigate to the AutoSpecker directory.
 
 3. Ensure you have the required Python packages installed by running the following command:
 
@@ -43,7 +43,7 @@ To set up SpeckApp on your local machine, follow these steps:
    pip install pymongo pyperclip flet
    ```
 
-4. Run the SpeckApp application using the following command:
+4. Run the AutoSpecker application using the following command:
 
    ```bash
    python app.py
@@ -51,7 +51,7 @@ To set up SpeckApp on your local machine, follow these steps:
 
 ## Usage
 
-Once SpeckApp is running, you can use the graphical interface to review and update document records in the MongoDB database. The application consists of two main sections: information display and control buttons.
+Once AutoSpecker is running, you can use the graphical interface to review and update document records in the MongoDB database. The application consists of two main sections: information display and control buttons.
 
 ### Information Display Section
 
