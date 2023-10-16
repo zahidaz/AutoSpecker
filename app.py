@@ -17,12 +17,12 @@ class SpeckApp:
         self.mongo_uri = ""
         with open("mongodb.secrete", "r") as f:
             self.mongo_uri = f.read()
-        self.query = {"manual_validation": {"$exists": False}}
+        #self.query = {"manual_validation": {"$exists": False}}
         self.sort = [("rule", 1)]
-        # self.query = {
-        #     "manual_validation": {"$exists": False},
-        #     "apk": "/mydata/apks/com.airbnb.android"
-        # }
+        self.query = {
+            "manual_validation": {"$exists": False},
+            "apk": "/mydata/apks/com.alibaba.aliexpresshd"
+        }
         self.cursor = None
 
         self.current_doc = None
@@ -160,7 +160,13 @@ class SpeckApp:
                 or self.history_pointer == len(self.history) - 1
             ):
                 # If there's no history or the pointer is at the end of the history
-                bson = next(self.cursor)
+                try:
+                    bson = next(self.cursor)
+                except pymongo.errors.CursorNotFound:
+                    self.set_console("Cursor Not Found", error=True)
+                    self.on_connect(None)
+                    bson = next(self.cursor)
+                    
                 json_string = json.dumps(bson, default=json_util.default)
                 doc = json.loads(json_string)
                 self.history.append(doc)
@@ -246,12 +252,18 @@ class SpeckApp:
 
     def open_file(self, event):
         file_path = "." + self.current_doc["file"]
+        line_number = self.current_doc["lineNumber"]
 
         # check if the file exists
         if not os.path.exists(file_path):
             self.set_console("File does not exist", error=True)
             return
-        try:
+        
+        # open the file in vscode
+        if self.open_in_vscode(file_path, line_number): 
+            return # if the file is opened in vscode, return
+        # if vscode is not installed, open the file in the default editor
+        try: # open the file in the default editor
             if platform.system() == "Windows":
                 os.startfile(file_path)
             elif platform.system() == "Darwin":
@@ -262,6 +274,31 @@ class SpeckApp:
                 self.set_console("Unsupported platform", error=True)
         except Exception as e:
             self.set_console(str(e), error=True)
+
+
+    def open_in_vscode(self, file_path, line_number):
+        help = """VSCode: Open the Command Palette (Cmd+Shift+P) and type 'shell command' to find the Shell Command:
+                    Install 'code' command in PATH command."""
+
+        try:
+            if platform.system() == "Windows":
+                subprocess.Popen(["code", "--goto", f"{file_path}:{line_number}", "-r"])
+            elif platform.system() == "Darwin":
+                subprocess.Popen(["code", "--goto", f"{file_path}:{line_number}", "-r"])
+            elif platform.system() == "Linux":
+                subprocess.Popen(["code", "--goto", f"{file_path}:{line_number}", "-r"])
+            else:
+                self.set_console("Unsupported platform", error=True)
+
+            return True
+        except Exception as e:
+            self.set_console(help, error=True)
+            # self.set_console(str(e), error=True)
+        
+        return False
+
+
+    
 
     def read_code_context(self, file_path):
         # read 3 lines before and after the line number
